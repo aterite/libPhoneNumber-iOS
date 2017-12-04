@@ -168,16 +168,20 @@
 
     regionCode = [regionCode uppercaseString];
     
-    if ([_cachedMetaDataKey isEqualToString:regionCode]) {
-        return _cachedMetaData;
+    @synchronized (self) {
+        if ([self.cachedMetaDataKey isEqualToString:regionCode]) {
+            return self.cachedMetaData;
+        }
     }
 
     NSDictionary *dict = [[self class] phoneNumberDataMap][@"countryToMetadata"];
     NSArray *entry = dict[regionCode];
     if (entry) {
         NBPhoneMetaData *metadata = [[NBPhoneMetaData alloc] initWithEntry:entry];
-        _cachedMetaData = metadata;
-        _cachedMetaDataKey = regionCode;
+        @synchronized (self) {
+            self.cachedMetaData = metadata;
+            self.cachedMetaDataKey = regionCode;
+        }
         return metadata;
     }
 
